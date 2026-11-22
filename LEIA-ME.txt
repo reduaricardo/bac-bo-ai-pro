@@ -1,0 +1,10 @@
+BAC BO AI PRO — Protótipo 0.1
+
+Como testar:
+1. Extraia o ZIP e abra index.html em um navegador.
+2. No iPhone, hospede os arquivos em um serviço HTTPS para abrir no Safari.
+3. No Safari, toque em Compartilhar > Adicionar à Tela de Início.
+
+Esta versão registra resultados manualmente e calcula frequências observadas.
+Os dados ficam no armazenamento local do navegador. OCR e importação de imagens
+serão etapas futuras. O protótipo não prevê resultados nem faz apostas.
