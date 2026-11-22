@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>BAC BO AI PRO — Evolution</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#151f30;--muted:#9aabc2;--line:#29374c;--blue:#2387ff;--red:#ef4b55;--gold:#e9b949;--green:#35c98a}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#101b2c,#090f19);color:#f4f7fb;font:16px system-ui,-apple-system,Segoe UI,sans-serif;padding:18px}
+main{max-width:760px;margin:auto}.top{text-align:center;margin:8px 0 20px}.top h1{font-size:25px;margin:0}.top p{color:var(--muted);margin:6px 0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:13px 0;box-shadow:0 8px 24px #0003}
+h2{font-size:17px;margin:0 0 12px}.signal{text-align:center;padding:22px 12px}.signal small{color:var(--muted);display:block}.signal strong{font-size:25px;display:block;margin:8px 0}.entry-p{color:#62adff}.entry-b{color:#ff737b}.entry-e{color:#ffd56a}.entry-w{color:#d7e0ed}
+.buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.buttons button{border:0;border-radius:12px;padding:16px 6px;font-weight:800;font-size:17px;color:white;cursor:pointer}.p{background:#1769c2}.b{background:#bd303a}.e{background:#a87913}.actions{display:flex;gap:10px;margin-top:10px}.actions button{flex:1;background:#26364d;color:#e8eef7;border:1px solid #3b4c65;border-radius:10px;padding:11px;font-weight:650}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{background:#0e1725;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}.stat b{display:block;font-size:23px}.stat span{color:var(--muted);font-size:13px}.bar{height:8px;background:#263448;border-radius:8px;overflow:hidden;margin-top:8px}.fill{height:100%;width:0%}.bluefill{background:var(--blue)}.redfill{background:var(--red)}.goldfill{background:var(--gold)}
+.note{color:var(--muted);font-size:13px;line-height:1.45}.history{display:flex;flex-wrap:wrap;gap:6px;min-height:28px}.dot{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800}.dot.P{background:#1769c2}.dot.B{background:#bd303a}.dot.E{background:#a87913}
+.tag{border-radius:8px;padding:8px 10px;background:#0e1725;color:#e9eef7;margin-top:10px;font-size:14px}.tag.high{border:1px solid #a87913;color:#ffdb78}.tag.ok{border:1px solid #287d60;color:#79e2b7}
+@media(max-width:420px){body{padding:12px}.panel{padding:13px}.top h1{font-size:22px}.stat b{font-size:20px}}
+</style>
+</head>
+<body><main>
+<header class="top"><h1>BAC BO AI PRO</h1><p>Modo de análise • Bac Bo Evolution</p></header>
+<section class="panel signal"><small>SINAL ATUAL — SIMULAÇÃO</small><strong id="signal" class="entry-w">AGUARDAR</strong><div id="reason" class="note">Registre os resultados para iniciar a análise.</div><div id="tieAlert" class="tag">Empate alto: aguardando dados</div></section>
+<section class="panel"><h2>Registrar resultado</h2><div class="buttons"><button class="p" onclick="add('P')">🔵 JOGADOR</button><button class="b" onclick="add('B')">🔴 BANQUEIRO</button><button class="e" onclick="add('E')">🟡 EMPATE</button></div><div class="actions"><button onclick="undo()">↶ Desfazer</button><button onclick="resetAll()">Limpar histórico</button></div></section>
+<section class="panel"><h2>Frequência geral</h2><div class="stats" id="allStats"></div><p class="note" id="total"></p></section>
+<section class="panel"><h2>Últimos 30 resultados</h2><div class="stats" id="recentStats"></div><p class="note">A frequência recente ajuda a observar mudanças, mas não garante o próximo resultado.</p></section>
+<section class="panel"><h2>Histórico registrado</h2><div class="history" id="history"></div><p class="note">Os resultados ficam salvos neste navegador. Use os botões para registrar cada rodada do Bac Bo Evolution.</p></section>
+<section class="panel"><h2>Como o sinal é calculado</h2><p class="note">O sistema compara a frequência dos últimos 30 resultados com o histórico total. O alerta de empate alto aparece quando há pelo menos 30 resultados e o empate atinge 20% ou mais na janela recente. A indicação azul/vermelha usa a sequência de resultados anteriores e só aparece com amostra mínima e diferença estatística definida. Tudo é análise retrospectiva/simulação, não previsão garantida.</p></section>
+</main>
+<script>
+const KEY='bacbo-evolution-history';
+let hist=[];try{hist=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(hist))hist=[];}catch(e){hist=[];}
+const labels={P:'JOGADOR',B:'BANQUEIRO',E:'EMPATE'};
+function save(){localStorage.setItem(KEY,JSON.stringify(hist));render();}
+function add(v){hist.push(v);save();}
+function undo(){hist.pop();save();}
+function resetAll(){if(confirm('Apagar todo o histórico salvo neste navegador?')){hist=[];save();}}
+function counts(a){return {P:a.filter(x=>x==='P').length,B:a.filter(x=>x==='B').length,E:a.filter(x=>x==='E').length};}
+function pct(n,total){return total?Math.round(n/total*100):0;}
+function statHTML(c,n){return [['P','JOGADOR','bluefill'],['B','BANQUEIRO','redfill'],['E','EMPATE','goldfill']].map(([k,l,cl])=>`<div class="stat"><b>${pct(c[k],n)}%</b><span>${l} · ${c[k]}/${n}</span><div class="bar"><div class="fill ${cl}" style="width:${pct(c[k],n)}%"></div></div></div>`).join('');}
+function analyze(){
+ const recent=hist.slice(-30), rc=counts(recent), total=hist.length, sig=document.getElementById('signal'), reason=document.getElementById('reason'), tie=document.getElementById('tieAlert');
+ let pick=null, why='';
+ if(recent.length>=30 && pct(rc.E,30)>=20){pick='E';why=`Empate em ${pct(rc.E,30)}% nos últimos 30 resultados (${rc.E}/30).`;}
+ else if(hist.length>=20){
+   const sample=hist.slice(-81);let trans={P:{P:0,B:0,E:0},B:{P:0,B:0,E:0},E:{P:0,B:0,E:0}};
+   for(let i=0;i<sample.length-1;i++)trans[sample[i]][sample[i+1]]++;
+   const last=hist[hist.length-1], row=trans[last], n=row.P+row.B+row.E;
+   const sorted=Object.entries(row).sort((a,b)=>b[1]-a[1]);
+   if(n>=8 && sorted[0][1]>sorted[1][1] && (sorted[0][1]-sorted[1][1])/n>=.18 && sorted[0][0]!=='E'){
+     pick=sorted[0][0];why=`Após ${labels[last]}, ${labels[pick]} lidera ${sorted[0][1]} de ${n} transições observadas.`;
+   }
+ }
+ sig.className=pick==='P'?'entry-p':pick==='B'?'entry-b':pick==='E'?'entry-e':'entry-w';
+ sig.textContent=pick?`ENTRADA SIMULADA: ${labels[pick]}`:'AGUARDAR';
+ reason.textContent=why|| (hist.length<20?'Aguardando pelo menos 20 resultados registrados.':'Sem diferença suficiente para emitir sinal.');
+ tie.className='tag'+(recent.length>=30&&pct(rc.E,30)>=20?' high':'');
+ tie.textContent=recent.length>=30?`Empate recente: ${pct(rc.E,30)}% (${rc.E}/30)${pct(rc.E,30)>=20?' — FREQUÊNCIA ALTA':''}`:`Empate alto: precisa de 30 resultados (atual: ${recent.length})`;
+}
+function render(){
+ let all=counts(hist),recent=hist.slice(-30),rc=counts(recent);
+ document.getElementById('allStats').innerHTML=statHTML(all,hist.length);
+ document.getElementById('recentStats').innerHTML=statHTML(rc,recent.length);
+ document.getElementById('total').textContent=`Total registrado: ${hist.length} resultados.`;
+ document.getElementById('history').innerHTML=hist.slice(-100).map(x=>`<span class="dot ${x}" title="${labels[x]}">${x}</span>`).join('')||'<span class="note">Nenhum resultado registrado.</span>';
+ analyze();
+}
+render();
+</script></body></html>
