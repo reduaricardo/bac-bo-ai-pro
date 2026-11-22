@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08111f">
+<title>BAC BO AI PRO</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{color-scheme:dark;--bg:#08111f;--panel:#111e30;--line:#23354d;--muted:#9aabc1;--white:#f4f7fb;--blue:#3185ff;--red:#f05262;--gold:#e6b84d}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#0b1728,#07101c 55%);color:var(--white);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom))}
+header{padding:22px 2px 16px}.eyebrow{font-size:11px;letter-spacing:2px;color:#83a9dc;font-weight:800}.brand{font-size:27px;font-weight:900;letter-spacing:.3px;margin:5px 0}.sub{color:var(--muted);font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #24543f;color:#77e0aa;background:#102a25;border-radius:99px;padding:6px 10px;font-size:11px;margin-top:12px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}.card,.panel{background:rgba(17,30,48,.94);border:1px solid var(--line);border-radius:17px;padding:14px;box-shadow:0 8px 25px #0002}.metric{font-size:25px;font-weight:850;margin:4px 0}.label{font-size:11px;color:var(--muted)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}.blue{background:var(--blue)}.red{background:var(--red)}.gold{background:var(--gold)}
+h2{font-size:16px;margin:0 0 12px}.panel{margin:12px 0}.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+button{border:0;border-radius:13px;padding:14px 7px;color:white;font-weight:800;font-size:13px;background:#24354d;cursor:pointer}
+button:active{transform:scale(.98)}.add-blue{background:#1765d1}.add-red{background:#c93649}.add-gold{background:#8e6b1c}
+.smallbtn{padding:10px 12px;background:#26384f;font-size:12px}
+.barrow{display:grid;grid-template-columns:76px 1fr 42px;align-items:center;gap:8px;margin:11px 0;font-size:12px}.track{height:9px;background:#26364a;border-radius:20px;overflow:hidden}.fill{height:100%;border-radius:20px}.history{display:flex;flex-wrap:wrap;gap:7px}.chip{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900}.chip.P{background:#1557a7}.chip.B{background:#a92c3b}.chip.E{background:#806019}.muted{color:var(--muted);font-size:12px;line-height:1.5}.row{display:flex;align-items:center;justify-content:space-between;gap:8px}.warning{border-left:3px solid var(--gold);padding-left:11px}.footer{text-align:center;color:#71839b;font-size:10px;padding:18px 8px}
+</style>
+</head>
+<body>
+<header>
+ <div class="eyebrow">ANÁLISE ESTATÍSTICA</div>
+ <div class="brand">BAC BO <span style="color:#68a8ff">AI PRO</span></div>
+ <div class="sub">Painel experimental • histórico e frequências</div>
+ <div class="pill">● MODO DE TESTE — SEM APOSTAS</div>
+</header>
+<div class="grid">
+ <div class="card"><div class="label"><span class="dot blue"></span>JOGADOR</div><div class="metric" id="pPct">0%</div><div class="label" id="pCount">0 resultados</div></div>
+ <div class="card"><div class="label"><span class="dot red"></span>BANQUEIRO</div><div class="metric" id="bPct">0%</div><div class="label" id="bCount">0 resultados</div></div>
+ <div class="card"><div class="label"><span class="dot gold"></span>EMPATE</div><div class="metric" id="ePct">0%</div><div class="label" id="eCount">0 resultados</div></div>
+</div>
+<section class="panel">
+ <h2>Registrar resultado</h2>
+ <div class="actions">
+  <button class="add-blue" onclick="add('P')">🔵 Jogador</button>
+  <button class="add-red" onclick="add('B')">🔴 Banqueiro</button>
+  <button class="add-gold" onclick="add('E')">🟡 Empate</button>
+ </div>
+ <p class="muted">Registre cada rodada manualmente. Os dados ficam salvos neste navegador do aparelho.</p>
+</section>
+<section class="panel">
+ <div class="row"><h2>Frequência observada</h2><span class="muted" id="total">0 rodadas</span></div>
+ <div class="barrow"><span>Jogador</span><div class="track"><div class="fill blue" id="pBar"></div></div><b id="pBarTxt">0%</b></div>
+ <div class="barrow"><span>Banqueiro</span><div class="track"><div class="fill red" id="bBar"></div></div><b id="bBarTxt">0%</b></div>
+ <div class="barrow"><span>Empate</span><div class="track"><div class="fill gold" id="eBar"></div></div><b id="eBarTxt">0%</b></div>
+ <p class="muted warning">Frequências descrevem apenas o histórico registrado. Não indicam nem garantem o próximo resultado.</p>
+</section>
+<section class="panel">
+ <div class="row"><h2>Últimos resultados</h2><button class="smallbtn" onclick="undo()">Desfazer</button></div>
+ <div class="history" id="history"><span class="muted">Nenhum resultado registrado ainda.</span></div>
+</section>
+<section class="panel">
+ <div class="row"><h2>Resumo da sessão</h2><button class="smallbtn" onclick="resetAll()">Limpar histórico</button></div>
+ <div class="muted" id="summary">Adicione resultados para começar a análise.</div>
+</section>
+<div class="footer">BAC BO AI PRO • Protótipo 0.1 • Não prevê resultados nem realiza apostas.</div>
+<script>
+let data=[];try{data=JSON.parse(localStorage.getItem('bacbo-history')||'[]')}catch(e){}
+const names={P:'Jogador',B:'Banqueiro',E:'Empate'};
+function save(){localStorage.setItem('bacbo-history',JSON.stringify(data));render()}
+function add(v){data.push(v);save()}
+function undo(){if(data.length){data.pop();save()}}
+function resetAll(){if(confirm('Apagar todo o histórico salvo neste aparelho?')){data=[];save()}}
+function render(){
+ const n=data.length, counts={P:0,B:0,E:0};data.forEach(x=>counts[x]++);
+ for(const k of ['P','B','E']){
+  const pct=n?Math.round(counts[k]/n*100):0;
+  document.getElementById(k.toLowerCase()+'Pct').textContent=pct+'%';
+  document.getElementById(k.toLowerCase()+'Count').textContent=counts[k]+' resultados';
+  document.getElementById(k.toLowerCase()+'Bar').style.width=pct+'%';
+  document.getElementById(k.toLowerCase()+'BarTxt').textContent=pct+'%';
+ }
+ document.getElementById('total').textContent=n+' rodadas';
+ const h=document.getElementById('history');h.innerHTML='';
+ if(!n)h.innerHTML='<span class="muted">Nenhum resultado registrado ainda.</span>';
+ else data.slice(-30).reverse().forEach((v,i)=>{let el=document.createElement('span');el.className='chip '+v;el.title=names[v];el.textContent=v==='P'?'J':v==='B'?'B':'E';h.appendChild(el)});
+ let streak=0;if(n){for(let i=n-1;i>=0&&data[i]===data[n-1];i--)streak++}
+ document.getElementById('summary').textContent=n?`Total: ${n} rodadas. Sequência atual: ${streak} ${names[data[n-1]]}(s). Os dados são descritivos e não permitem concluir o que sairá na próxima rodada.`:'Adicione resultados para começar a análise.';
+}
+render();
+</script>
+</body></html>
